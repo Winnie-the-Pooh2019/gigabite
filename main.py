@@ -1,7 +1,6 @@
 import argparse
 import enum
 import os
-
 from dotenv import load_dotenv
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_gigachat.chat_models import GigaChat
@@ -55,7 +54,6 @@ print(f'\nloading model: {model_type.value}')
 
 system_message = read_system_message(SYSTEM_PROMPT_FILE)
 print(f'\ngot system message: {system_message}')
-
 
 giga = GigaChat(
     credentials=GIGA_TOKEN,
