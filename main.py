@@ -71,50 +71,45 @@ async def clear_context(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Начнём с чистого листа.")
 
 
-async def start(update: Update, context):
-    user_id = update.effective_user.id
-
-    messages = [
-        SystemMessage(system_message),
-        HumanMessage('Добрый день'),
-    ]
-
-    try:
-        response = giga.invoke(messages)
-        user_contexts[user_id].append(response)
-        bot_response = response.content
-
-        await update.message.reply_text(bot_response)
-
-    except Exception as e:
-        print(f"Error: {e}")
-        await update.message.reply_text("System error occurred... Try again later.")
-
-
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    user_input = update.message.text
-
+async def process_message(user_id, user_message) -> str:
     if user_id not in user_contexts:
         user_contexts[user_id] = []
 
-    user_contexts[user_id].append(HumanMessage(user_input))
+    user_contexts[user_id].append(HumanMessage(user_message))
 
     messages = [
+        SystemMessage(system_message),
         *user_contexts[user_id]
     ]
 
     try:
         response = giga.invoke(messages)
-        bot_response = response.content
         user_contexts[user_id].append(response)
+
+        bot_response = response.content
 
     except Exception as e:
         print(f"Error: {e}")
         bot_response = 'System error occurred... Try again later.'
 
     if verbose:
-        print(f'\nuser: {user_id}\n\tuser message: {user_input}\n\tresponse: {bot_response}\n')
+        print(f'\nuser: {user_id}\n\tuser message: {user_message}\n\tresponse: {bot_response}\n')
+
+    return bot_response
+
+
+async def start(update: Update, context):
+    user_id = update.effective_user.id
+    response = await process_message(user_id, 'Добрый день')
+
+    await update.message.reply_text(response)
+
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    user_input = update.message.text
+
+    bot_response = await process_message(user_id, user_input)
 
     await update.message.reply_text(bot_response)
 
