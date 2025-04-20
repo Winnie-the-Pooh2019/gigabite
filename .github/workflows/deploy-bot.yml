@@ -54,5 +54,5 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           port: 22
           script: |
-            bash unzip ~/app/app.zip -d ~/app \
+            unzip ~/app/app.zip -d ~/app \
             && bash ~/app/deploy.sh
