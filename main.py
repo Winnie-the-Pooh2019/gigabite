@@ -72,6 +72,8 @@ async def clear_context(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def start(update: Update, context):
+    user_id = update.effective_user.id
+
     messages = [
         SystemMessage(system_message),
         HumanMessage('Добрый день'),
@@ -79,10 +81,10 @@ async def start(update: Update, context):
 
     try:
         response = giga.invoke(messages)
-
+        user_contexts[user_id].append(response)
         bot_response = response.content
 
-        await update.message.reply_text(bot_response[:4000])
+        await update.message.reply_text(bot_response)
 
     except Exception as e:
         print(f"Error: {e}")
@@ -96,10 +98,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id not in user_contexts:
         user_contexts[user_id] = []
 
-    user_contexts[user_id].append(user_input)
+    user_contexts[user_id].append(HumanMessage(user_input))
 
     messages = [
-        SystemMessage(system_message),
         *user_contexts[user_id]
     ]
 
